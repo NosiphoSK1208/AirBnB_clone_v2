@@ -13,10 +13,10 @@ class BaseModel:
     """On this class will defines all common attributes/methods
     for other classes
     """
-    # initialize columns database
+    # init of columns database
+    id = Column(String(60), primary_key=True, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
-    updated_at = Column(DateTime, nullable=False, default=created_at)
-    id = Column(String(60), nullable=False, primary_key=True)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
 
     def __init__(self, *args, **kwargs):
         """Int of base model class

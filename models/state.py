@@ -12,8 +12,8 @@ class State(BaseModel):
     __tablename__ = "states"
 
     if environ['HBNB_TYPE_STORAGE'] == 'db':
-        cities = relationship('City', cascade='all, delete', backref='state')
         name = Column(String(128), nullable=False)
+        cities = relationship('City', cascade='all, delete', backref='state')
     else:
         @property
         def cities(self):
@@ -30,7 +30,7 @@ class State(BaseModel):
 
             """get values from dict to list"""
             for city in the_cities_dict.values():
-                if city.state_id == self.id:
+                if city.state.id == self.id:
                     the_cities_list.append(city)
 
             return the_cities_list
