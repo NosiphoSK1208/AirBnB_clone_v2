@@ -1,87 +1,66 @@
 #!/usr/bin/python3
-"""This is the base model class for AirBnB"""
-import uuid
+"""Defines the BaseModel class."""
 import models
+from uuid import uuid4
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column
+from sqlalchemy import DateTime
+from sqlalchemy import String
 
 Base = declarative_base()
 
 
 class BaseModel:
-    """On this class will defines all common attributes/methods
-    for other classes
+    """Defines the BaseModel class.
+
+    Attributes:
+        id (sqlalchemy String): The BaseModel id.
+        created_at : The datetime at creation.
+        updated_at : The datetime of last update.
     """
-    # init of columns database
+
     id = Column(String(60), primary_key=True, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
 
     def __init__(self, *args, **kwargs):
-        """Int of base model class
-        Args:
-            args: never used
-            kwargs: constructor of the BaseModel arguments 
-        Attributes:
-            id: generated unique id 
-            created_at: date creation
-            updated_at: date updated
-        """
-        if kwargs:
-            if 'id' not in kwargs:
-                self.id = str(uuid.uuid4())
+        """Init a new BaseModel.
 
+        Args:
+            *args (any): Unused.
+            **kwargs (dict): Key/value pairs of a attribute.
+        """
+        self.id = str(uuid4())
+        self.created_at = self.updated_at = datetime.utcnow()
+        if kwargs:
             for key, value in kwargs.items():
                 if key == "created_at" or key == "updated_at":
                     value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
                 if key != "__class__":
                     setattr(self, key, value)
 
-            if 'created_at' not in kwargs:
-                self.created_at = self.updated_at = datetime.now()
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = self.updated_at = datetime.now()
-
-    def __str__(self):
-        """returns the string
-        Return:
-            returns the string of class dictionary, name & id 
-        """
-        return "[{}] ({}) {}".format(
-            type(self).__name__, self.id, self.__dict__)
-
-    def __repr__(self):
-        """return a string representaion
-        """
-        return self.__str__()
-
     def save(self):
-        """the public instance attribute updated_at to current
-        """
-        self.updated_at = datetime.now()
+        """Update updated_at with the current datetime."""
+        self.updated_at = datetime.utcnow()
         models.storage.new(self)
         models.storage.save()
 
+    def to_dict(self):
+        """Return a dict repre of the BaseModel instance."""
+        the_dict = self.__dict__.copy()
+        the_dict["__class__"] = str(type(self).__name__)
+        the_dict["created_at"] = self.created_at.isoformat()
+        the_dict["updated_at"] = self.updated_at.isoformat()
+        the_dict.pop("_sa_instance_state", None)
+        return the_dict
+
     def delete(self):
-        """methond to delete current instance from storage
-        """
+        """Delete the selected instance from storage."""
         models.storage.delete(self)
 
-    def to_dict(self):
-        """methond creates dictionary of the class  and returns
-        Return:
-            returns a dictionary of all the key values in __dict__
-        """
-        the_dictionary = dict(self.__dict__)
-
-        if '_sa_instance_state' in the_dictionary:
-            del the_dictionary['_sa_instance_state']
-
-        the_dictionary["__class__"] = str(type(self).__name__)
-
-        the_dictionary["created_at"] = self.created_at.isoformat()
-        the_dictionary["updated_at"] = self.updated_at.isoformat()
-
-        return the_dictionary
+    def __str__(self):
+        """Return the print/str rep of the BaseModel instance."""
+        xy = self.__dict__.copy()
+        xy.pop("_sa_instance_state", None)
+        return "[{}] ({}) {}".format(type(self).__name__, self.id, xy)

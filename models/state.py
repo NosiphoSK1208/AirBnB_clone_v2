@@ -1,36 +1,27 @@
 #!/usr/bin/python3
-""" State Module for HBNB project """
-from os import environ
-from sqlalchemy import Column, String
+"""Defines the State class."""
+import models
+from os import getenv
+from models.base_model import Base
+from models.base_model import BaseModel
+from models.city import City
+from sqlalchemy import Column
+from sqlalchemy import String
 from sqlalchemy.orm import relationship
-from models.base_model import BaseModel, Base
 
 
-
-class State(BaseModel):
-    """ State class """
+class State(BaseModel, Base):
+    """Represents a state for a MySQL database."""
     __tablename__ = "states"
+    name = Column(String(128), nullable=False)
+    cities = relationship("City",  backref="state", cascade="delete")
 
-    if environ['HBNB_TYPE_STORAGE'] == 'db':
-        name = Column(String(128), nullable=False)
-        cities = relationship('City', cascade='all, delete', backref='state')
-    else:
+    if getenv("HBNB_TYPE_STORAGE") != "db":
         @property
         def cities(self):
-            """
-            Getter attribute that returns a list of City instances with a state_id
-            equal to the current State's id. This leverages the FileStorage relationship
-            between State and City.
-            """
-            from models import storage
-            from models.city import City
-            """returns City objs list in __objects"""
-            the_cities_dict = storage.all(City)
-            the_cities_list = []
-
-            """get values from dict to list"""
-            for city in the_cities_dict.values():
-                if city.state.id == self.id:
-                    the_cities_list.append(city)
-
-            return the_cities_list
+            """We Get a list of all related City objects."""
+            list_of_city = []
+            for city in list(models.storage.all(City).values()):
+                if city.state_id == self.id:
+                    list_of_city.append(city)
+            return list_of_city
