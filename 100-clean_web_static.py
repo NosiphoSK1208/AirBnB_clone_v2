@@ -1,6 +1,5 @@
 
-env.hosts = ['34.205.65.89', '100.26.162.105']
-
+env.hosts = ['100.25.215.46', '52.3.246.184'] 
 
 def do_clean(number=0):
     """Delete out-of-date archives.
