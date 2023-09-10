@@ -1,23 +1,44 @@
+#!/usr/bin/python3
+"""Fabric script to clean up old versions of web_static"""
 
-env.hosts = ['100.25.215.46', '52.3.246.184'] 
+from fabric.api import *
+import os
+
+env.hosts = ['100.25.215.46', '52.3.246.184']  # Replace with your server IPs
+env.user = 'ubuntu'  # Replace with your username
+env.key_filename = '~/.ssh/school'  # Replace with your SSH key path
 
 def do_clean(number=0):
-    """Delete out-of-date archives.
-    Args:
-        number (int): The number of archives to keep.
-    If number is 0 or 1, keeps only the most recent archive. If
-    number is 2, keeps the most and second-most recent archives,
-    etc.
     """
-    number = 1 if int(number) == 0 else int(number)
+    Deletes out-of-date archives and old versions of web_static
+    """
+    try:
+        number = int(number)
+    except ValueError:
+        return
 
-    archives = sorted(os.listdir("versions"))
-    [archives.pop() for i in range(number)]
-    with lcd("versions"):
-        [local("rm ./{}".format(a)) for a in archives]
+    if number < 2:
+        number = 1
 
-    with cd("/data/web_static/releases"):
-        archives = run("ls -tr").split()
-        archives = [a for a in archives if "web_static_" in a]
-        [archives.pop() for i in range(number)]
-        [run("rm -rf ./{}".format(a)) for a in archives]
+    with cd('/data/web_static/releases'):
+        archives = sorted(run('ls -1t').split())
+        for archive in archives[number:]:
+            run('rm -rf {}'.format(archive))
+
+    with cd('/data/web_static/releases'):
+        archives = sorted(run('ls -1t').split())
+        for archive in archives[number:]:
+            run('rm -rf {}'.format(archive))
+
+    with cd('/data/web_static/releases'):
+        archives = sorted(run('ls -1t').split())
+        for archive in archives[number:]:
+            run('rm -rf {}'.format(archive))
+
+    with cd('/data/web_static/releases'):
+        archives = sorted(run('ls -1t').split())
+        for archive in archives[number:]:
+            run('rm -rf {}'.format(archive))
+
+    with lcd('versions'):
+        local('ls -1t | tail -n +{} | xargs rm -rf'.format(number + 1))
