@@ -4,3 +4,5 @@ test_params_create
 tests/test_models/__pycache__/
 tests/test_models/test_engine/__pycache__/
 web-lb
+web-01
+web-02
